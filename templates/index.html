@@ -5,17 +5,91 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>GlabCoin</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="container">
-        <img src="{{ url_for('static', filename='coin.png') }}" alt="GlabCoin Logo" class="logo">
+        <img src="{{ url_for('static', filename='coin.png') }}" class="logo" alt="GlabCoin Logo" />
         <h1>Welcome to GlabCoin</h1>
-        <p>The future of cryptocurrency is now old man!!</p>
+        <p>The future of cryptocurrency is now old man!</p>
+
         <div class="stats">
-            <p><strong>Price:</strong> ${{ price }}</p>
-            <p><strong>Market Cap:</strong> ${{ market_cap | comma_format }}</p>
-            <p><strong>Circulating Supply:</strong> {{ supply | comma_format }} coins</p>
+            <p><strong>Price:</strong> $<span id="price">{{ price }}</span></p>
+            <p><strong>Market Cap:</strong> $<span id="market_cap">{{ market_cap | comma_format }}</span></p>
+            <p><strong>Circulating Supply:</strong> <span id="supply">{{ supply | comma_format }}</span> coins</p>
         </div>
+        <canvas id="priceChart" width="400" height="200" style="margin-top: 2rem;"></canvas>
     </div>
 </body>
+<script>
+    let price = parseFloat(document.getElementById("price").textContent);
+    let marketCap = parseInt(document.getElementById("market_cap").textContent.replace(/,/g, ""));
+    let supply = parseInt(document.getElementById("supply").textContent.replace(/,/g, ""));
+
+    const priceData = {
+        labels: [],
+        datasets: [{
+            label: 'Price ($)',
+            data: [],
+            borderColor: '#3EC6FF',
+            backgroundColor: 'rgba(62, 198, 255, 0.2)',
+            tension: 0.3
+        }]
+    };
+
+    const config = {
+        type: 'line',
+        data: priceData,
+        options: {
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Time'
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Price ($)'
+                    }
+                }
+            }
+        }
+    };
+
+    const ctx = document.getElementById('priceChart').getContext('2d');
+    const chart = new Chart(ctx, config);
+
+    function updateValues() {
+        // Simulate price change (-5% to +5%)
+        const delta = price * (Math.random() * 0.1 - 0.05);
+        price = Math.max(0.0001, price + delta);
+        supply += Math.floor(Math.random() * 1000); // Random minting
+        marketCap = Math.floor(price * supply);
+
+        // Update DOM
+        document.getElementById("price").textContent = price.toFixed(4);
+        document.getElementById("market_cap").textContent = marketCap.toLocaleString();
+        document.getElementById("supply").textContent = supply.toLocaleString();
+
+        // Update chart
+        const now = new Date().toLocaleTimeString();
+        priceData.labels.push(now);
+        priceData.datasets[0].data.push(price.toFixed(4));
+
+        // Keep the last 20 entries
+        if (priceData.labels.length > 20) {
+            priceData.labels.shift();
+            priceData.datasets[0].data.shift();
+        }
+
+        chart.update();
+    }
+
+    // Update every 3 seconds
+    setInterval(updateValues, 3000);
+</script>
 </html>
+
