@@ -16,14 +16,3 @@ def home():
                            price=fake_price, 
                            market_cap=fake_market_cap, 
                            supply=fake_supply)
-
-
-
-# if __name__ == '__main__':
-#     app.run(debug=True)
-
-def handler(environ, start_response):
-    from werkzeug.wsgi import DispatcherMiddleware
-    from werkzeug.serving import run_simple
-
-    return app(environ, start_response)
