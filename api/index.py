@@ -16,3 +16,6 @@ def home():
                            price=fake_price, 
                            market_cap=fake_market_cap, 
                            supply=fake_supply)
+
+if __name__ == "__main__":
+    app.run(debug=True)
