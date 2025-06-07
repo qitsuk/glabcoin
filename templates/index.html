@@ -4,19 +4,18 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>GlabCoin 🚀</title>
-    <style>
-      body { font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; text-align: center; }
-      h1 { color: #4caf50; }
-      .stats { margin-top: 20px; font-size: 1.2rem; }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h1>Welcome to GlabCoin 🚀</h1>
-    <p>The future of cryptocurrency is now old!</p>
-    <div class="stats">
-        <p><strong>Price:</strong> ${{ price }}</p>
-        <p><strong>Market Cap:</strong> ${{ market_cap | comma_format }}</p>
-        <p><strong>Circulating Supply:</strong> {{ supply | comma_format }} coins</p>
+    <div class="container">
+        <img src="{{ url_for('static', filename='coin.png') }}" alt="GlabCoin Logo" class="logo">
+        <h1>Welcome to GlabCoin 🚀</h1>
+        <p>The future of cryptocurrency is now old man!!</p>
+        <div class="stats">
+            <p><strong>Price:</strong> ${{ price }}</p>
+            <p><strong>Market Cap:</strong> ${{ market_cap | comma_format }}</p>
+            <p><strong>Circulating Supply:</strong> {{ supply | comma_format }} coins</p>
+        </div>
     </div>
 </body>
 </html>
