@@ -77,7 +77,7 @@ def update_data_periodically():
             json.dump(data[-100:], f, indent=2)  # Keep last 100 entries
 
 # Homepage
-@app.route('/')
+@app.route('/', endpoint='home')
 def home():
     try:
         with open(DATA_FILE, 'r') as f:
@@ -94,6 +94,22 @@ def home():
                            price=price,
                            supply=supply,
                            market_cap=market_cap)
+
+@app.route('/about')
+def about():
+    return render_template('about.html')
+
+@app.route('/buy')
+def buy():
+    try:
+        with open(DATA_FILE, 'r') as f:
+            data = json.load(f)
+            latest = data[-1] if data else {"price": 0.05}
+    except Exception:
+        latest = {"price": 0.05}
+
+    price = latest["price"]
+    return render_template('buy.html', price_per_coin=price)
 
 # API endpoint
 @app.route('/data')

@@ -38,3 +38,53 @@ h1 {
 .stats p {
     margin: 0.4rem 0;
 }
+
+/* Updated fixed full-width navbar */
+.toolbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  background-color: #132D4A;      /* Dark blue matching your container bg */
+  padding: 0.5rem 2rem;            /* Less vertical padding for less bulk */
+  display: flex;
+  justify-content: flex-end;       /* Align nav items to the right */
+  gap: 2rem;
+  box-sizing: border-box;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.7); /* subtle shadow for depth */
+  z-index: 1000;                   /* Stay on top */
+  font-size: 1rem;
+  font-weight: 600;
+  user-select: none;
+  backdrop-filter: saturate(180%) blur(5px); /* subtle glass effect */
+}
+
+/* Navbar links style */
+.toolbar .nav-link {
+  color: #90caf9;                 /* Soft light blue to match headings */
+  text-decoration: none;
+  transition: color 0.3s ease, transform 0.2s ease;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+}
+
+/* Hover effect */
+.toolbar .nav-link:hover {
+  color: #3EC6FF;                /* Bright blue like your h1 */
+  text-decoration: underline;
+  transform: scale(1.05);
+}
+.disclaimer {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  font-size: 0.75rem;     /* small but readable */
+  color: #90caf9;         /* light blue to match site */
+  opacity: 0.7;
+  font-style: italic;
+  user-select: none;
+  pointer-events: none;   /* so it doesn’t interfere with clicks */
+  z-index: 1100;
+}
+

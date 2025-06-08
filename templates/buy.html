@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Buy GlabCoin</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+    <style>
+        body {
+            margin: 0;
+            background-color: #132D4A;
+            color: #F0F8FF;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 2rem auto;
+            background-color: #132D4A;
+            padding: 2rem 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 1.8rem;
+            font-weight: 700;
+            color: #3EC6FF;
+        }
+
+        label {
+            display: block;
+            margin-top: 1.2rem;
+            font-weight: 600;
+        }
+
+        input[type="number"],
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 0.5rem 0.8rem;
+            margin-top: 0.3rem;
+            border: 1.5px solid #3EC6FF;
+            border-radius: 8px;
+            background-color: #0D223A;
+            color: #F0F8FF;
+            font-size: 1rem;
+        }
+
+        #paymentMethods {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 1rem;
+            justify-content: center;
+        }
+
+        .payment-option {
+            flex: 1;
+            background-color: #0D223A;
+            border: 1.5px solid #3EC6FF;
+            border-radius: 10px;
+            padding: 1rem 0.5rem;
+            cursor: pointer;
+            text-align: center;
+            color: #F0F8FF;
+            font-weight: 600;
+            user-select: none;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.4rem;
+            min-width: 120px;
+        }
+
+        .payment-option img {
+            width: 48px;
+            filter: brightness(0) invert(1);
+        }
+
+        .payment-option.selected {
+            background-color: #3EC6FF;
+            border-color: #3EC6FF;
+            color: #132D4A;
+            box-shadow: 0 0 8px #3EC6FFaa;
+        }
+
+        .payment-option:hover:not(.selected) {
+            background-color: #274d73;
+            border-color: #90caf9;
+            color: #90caf9;
+        }
+
+        #paypalMessage {
+            margin-top: 1rem;
+            color: #ff6b6b;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        #creditCardFields {
+            margin-top: 1rem;
+        }
+
+        #cardType {
+            margin-top: 0.5rem;
+            font-style: italic;
+            color: #90caf9;
+            text-align: right;
+            font-size: 0.9rem;
+        }
+
+        #totalPrice {
+            margin-top: 1.8rem;
+            font-weight: 700;
+            font-size: 1.3rem;
+            text-align: center;
+            color: #3EC6FF;
+        }
+
+        button[type="submit"] {
+            display: block;
+            width: 100%;
+            margin-top: 2rem;
+            padding: 0.9rem 0;
+            background-color: #3EC6FF;
+            border: none;
+            border-radius: 10px;
+            color: #132D4A;
+            font-weight: 700;
+            font-size: 1.15rem;
+            cursor: pointer;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #60bfff;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Header styled with site theme -->
+    {% include 'header.html' %}
+    <main>
+        <section class="container">
+            <h1>Buy GlabCoin</h1>
+            <form id="buyForm" autocomplete="off" novalidate>
+                <label for="amount">Amount of GlabCoin to buy:</label>
+                <input type="number" id="coinAmount" name="coinAmount" min="1" required
+                    placeholder="Enter amount of GlabCoin">
+
+                <label>Payment Method:</label>
+                <div id="paymentMethods" role="radiogroup">
+                    <div id="paypalOption" class="payment-option selected" role="radio" aria-checked="true"
+                        tabindex="0">
+                        <img src="{{ url_for('static', filename='paypal-icon.png') }}" alt="PayPal" />
+                        PayPal
+                    </div>
+                    <div id="creditCardOption" class="payment-option" role="radio" aria-checked="false" tabindex="-1">
+                        <img src="{{ url_for('static', filename='credit-card-icon.png') }}" alt="Credit Card" />
+                        Credit Card
+                    </div>
+                </div>
+
+                <div id="paypalMessage">
+                    Currently, only credit card payments are accepted.
+                </div>
+
+                <div id="creditCardFields" style="display: none;">
+                    <label for="cardNumber">Card Number:</label>
+                    <input type="text" id="cardNumber" name="cardNumber" maxlength="19"
+                        placeholder="1234 5678 9012 3456" />
+                    <div id="cardType">Card type: Unknown</div>
+
+                    <label for="expiryDate">Expiry Date:</label>
+                    <input type="text" id="expiryDate" name="expiryDate" placeholder="MM/YY" maxlength="5" />
+
+                    <label for="cvv">CVV:</label>
+                    <input type="password" id="cvv" name="cvv" maxlength="4" placeholder="123" />
+                </div>
+
+                <div id="totalPrice">Price: 1000 DKK</div>
+
+                <button type="submit">Buy GlabCoin</button>
+            </form>
+        </section>
+    </main>
+
+    <script>
+        const pricePerCoin = {{ price_per_coin }};
+        function updatePrice() {
+            const amount = Number(document.getElementById('amount').value) || 0;
+            const total = (amount * pricePerCoin).toFixed(2);
+            document.getElementById('totalPrice').innerText = `Price: ${total} DKK`;
+        }
+
+        function selectPayment(method) {
+            const paypal = document.getElementById('paypalOption');
+            const cc = document.getElementById('creditCardOption');
+            const ccFields = document.getElementById('creditCardFields');
+            const msg = document.getElementById('paypalMessage');
+
+            paypal.classList.remove('selected');
+            cc.classList.remove('selected');
+            if (method === 'paypal') {
+                paypal.classList.add('selected');
+                ccFields.style.display = 'none';
+                msg.style.display = 'block';
+            } else {
+                cc.classList.add('selected');
+                ccFields.style.display = 'block';
+                msg.style.display = 'none';
+            }
+        }
+
+        function detectCardType(number) {
+            const clean = number.replace(/\D/g, '');
+            if (/^4/.test(clean)) return "Visa";
+            if (/^(5[1-5]|2[2-7])/.test(clean)) return "MasterCard";
+            if (/^3[47]/.test(clean)) return "AmEx";
+            return "Unknown";
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            updatePrice();
+
+            document.getElementById("amount").addEventListener("input", updatePrice);
+
+            document.getElementById("paypalOption").addEventListener("click", () => selectPayment("paypal"));
+            document.getElementById("creditCardOption").addEventListener("click", () => selectPayment("credit"));
+
+            document.getElementById("cardNumber").addEventListener("input", (e) => {
+                const type = detectCardType(e.target.value);
+                document.getElementById("cardType").innerText = `Card type: ${type}`;
+            });
+        });
+    </script>
+</body>
+
+</html>
