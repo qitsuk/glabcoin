@@ -14,82 +14,93 @@
         <p>The future of cryptocurrency is now old man!</p>
 
         <div class="stats">
-            <p><strong>Price:</strong> $<span id="price">{{ price }}</span></p>
-            <p><strong>Market Cap:</strong> $<span id="market_cap">{{ market_cap | comma_format }}</span></p>
-            <p><strong>Circulating Supply:</strong> <span id="supply">{{ supply | comma_format }}</span> coins</p>
+        <p><strong>Price:</strong> $<span id="price">{{ price }}</span></p>
+        <p><strong>Market Cap:</strong> $<span id="market_cap">{{ market_cap | comma_format }}</span></p>
+        <p><strong>Circulating Supply:</strong> <span id="supply">{{ supply | comma_format }}</span> coins</p>
         </div>
         <canvas id="priceChart" width="400" height="200" style="margin-top: 2rem;"></canvas>
     </div>
 </body>
 <script>
-    let price = parseFloat(document.getElementById("price").textContent);
-    let marketCap = parseInt(document.getElementById("market_cap").textContent.replace(/,/g, ""));
-    let supply = parseInt(document.getElementById("supply").textContent.replace(/,/g, ""));
+let chart = null;
 
-    const priceData = {
-        labels: [],
-        datasets: [{
-            label: 'Price ($)',
-            data: [],
-            borderColor: '#3EC6FF',
-            backgroundColor: 'rgba(62, 198, 255, 0.2)',
-            tension: 0.3
-        }]
-    };
+async function fetchDataAndDraw() {
+  const res = await fetch('/data');
+  const data = await res.json();
 
-    const config = {
-        type: 'line',
-        data: priceData,
-        options: {
-            scales: {
-                x: {
-                    title: {
-                        display: true,
-                        text: 'Time'
-                    }
-                },
-                y: {
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: 'Price ($)'
-                    }
-                }
-            }
-        }
-    };
+  if (!data.length) return;
 
-    const ctx = document.getElementById('priceChart').getContext('2d');
-    const chart = new Chart(ctx, config);
+  const latest = data[data.length - 1];
+  const labels = data.map(d => new Date(d.timestamp).toLocaleTimeString());
+  const prices = data.map(d => parseFloat(d.price.toFixed(4)));
+  const supplies = data.map(d => d.supply);
 
-    function updateValues() {
-        // Simulate price change (-5% to +5%)
-        const delta = price * (Math.random() * 0.1 - 0.05);
-        price = Math.max(0.0001, price + delta);
-        supply += Math.floor(Math.random() * 1000); // Random minting
-        marketCap = Math.floor(price * supply);
+  // ✅ Update stats
+  document.getElementById("price").textContent = latest.price.toFixed(4);
+  document.getElementById("supply").textContent = latest.supply.toLocaleString();
+  const marketCap = (latest.price * latest.supply).toFixed(2);
+  document.getElementById("market_cap").textContent = parseFloat(marketCap).toLocaleString();
 
-        // Update DOM
-        document.getElementById("price").textContent = price.toFixed(4);
-        document.getElementById("market_cap").textContent = marketCap.toLocaleString();
-        document.getElementById("supply").textContent = supply.toLocaleString();
+  // ✅ Chart setup
+  const chartData = {
+    labels,
+    datasets: [
+      {
+        label: 'GlabCoin Price ($)',
+        data: prices,
+        borderColor: '#4FC3F7',
+        backgroundColor: 'rgba(33, 150, 243, 0.2)',
+        yAxisID: 'y1',
+        tension: 0.3
+      },
+      {
+        label: 'GlabCoin Supply',
+        data: supplies,
+        borderColor: '#81C784',
+        backgroundColor: 'rgba(129, 199, 132, 0.2)',
+        yAxisID: 'y2',
+        tension: 0.3
+      }
+    ]
+  };
 
-        // Update chart
-        const now = new Date().toLocaleTimeString();
-        priceData.labels.push(now);
-        priceData.datasets[0].data.push(price.toFixed(4));
-
-        // Keep the last 20 entries
-        if (priceData.labels.length > 20) {
-            priceData.labels.shift();
-            priceData.datasets[0].data.shift();
-        }
-
-        chart.update();
+  const chartOptions = {
+    responsive: true,
+    animation: false,
+    scales: {
+      x: { title: { display: true, text: 'Time' } },
+      y1: {
+        type: 'linear',
+        position: 'left',
+        title: { display: true, text: 'Price ($)' },
+        ticks: { callback: v => '$' + v }
+      },
+      y2: {
+        type: 'linear',
+        position: 'right',
+        title: { display: true, text: 'Supply' },
+        grid: { drawOnChartArea: false },
+        ticks: { callback: v => v.toLocaleString() }
+      }
     }
+  };
 
-    // Update every 3 seconds
-    setInterval(updateValues, 3000);
+  const ctx = document.getElementById('priceChart').getContext('2d');
+
+  // 🧹 Destroy existing chart before reinitializing
+  if (chart) {
+    chart.destroy();
+  }
+
+  chart = new Chart(ctx, {
+    type: 'line',
+    data: chartData,
+    options: chartOptions
+  });
+}
+
+fetchDataAndDraw();
+setInterval(fetchDataAndDraw, 10000);
 </script>
 </html>
 
